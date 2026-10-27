@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Transportasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap');
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+            touch-action: manipulation;
+            overflow: hidden; /* Prevent scrolling */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, .font-title {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        /* 3D Button Styles */
+        .btn-3d {
+            position: relative;
+            transition: all 0.1s ease;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+        }
+        .btn-3d:active {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 rgba(0,0,0,0.2);
+        }
+        
+        .btn-blue { background-color: #3b82f6; box-shadow: 0 8px 0 #1d4ed8; color: white; }
+        .btn-blue:active { box-shadow: 0 0px 0 #1d4ed8; }
+        
+        .btn-green { background-color: #22c55e; box-shadow: 0 8px 0 #15803d; color: white; }
+        .btn-green:active { box-shadow: 0 0px 0 #15803d; }
+        
+        .btn-yellow { background-color: #eab308; box-shadow: 0 8px 0 #a16207; color: white; }
+        .btn-yellow:active { box-shadow: 0 0px 0 #a16207; }
+
+        .btn-orange { background-color: #f97316; box-shadow: 0 8px 0 #c2410c; color: white; }
+        .btn-orange:active { box-shadow: 0 0px 0 #c2410c; }
+
+        /* Animations */
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .animate-drive {
+            animation: drive 4s linear infinite;
+        }
+        @keyframes drive {
+            0% { transform: translateX(-20px); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(-20px); }
+        }
+
+        .animate-pop {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* Canvas for confetti */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* SVG shadows for 3D effect */
+        .svg-3d {
+            filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center p-4">
+    
+    <canvas id="confetti-canvas"></canvas>
+
+    <div id="app-container" class="w-full max-w-2xl bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-6 sm:p-10 border-4 border-white relative overflow-hidden h-[90vh] sm:h-auto flex flex-col justify-center animate-pop">
+        
+        <!-- Screen: Main Menu -->
+        <div id="screen-menu" class="text-center">
+            <h1 class="text-4xl sm:text-6xl text-blue-600 mb-6 font-title tracking-wide drop-shadow-md">PETUALANGAN<br><span class="text-orange-500">TRANSPORTASI</span></h1>
+            
+            <div class="flex justify-center mb-8 h-40 relative">
+                <div class="absolute animate-float" style="left: 10%; top: 10%;">
+                    <!-- Plane SVG Small -->
+                    <svg width="80" height="80" viewBox="0 0 100 100" class="svg-3d">
+                        <path d="M90 50 L60 40 L40 10 L30 10 L45 45 L15 50 L5 40 L0 45 L10 55 L0 65 L5 70 L15 60 L45 65 L30 100 L40 100 L60 70 L90 60 C95 58 95 52 90 50 Z" fill="#3b82f6"/>
+                        <circle cx="65" cy="55" r="4" fill="white"/>
+                        <circle cx="55" cy="52" r="4" fill="white"/>
+                        <circle cx="45" cy="49" r="4" fill="white"/>
+                    </svg>
+                </div>
+                <div class="absolute animate-drive" style="right: 10%; bottom: 0%;">
+                    <!-- Bus SVG Small -->
+                    <svg width="100" height="80" viewBox="0 0 120 80" class="svg-3d">
+                        <rect x="10" y="20" width="100" height="40" rx="10" fill="#eab308"/>
+                        <rect x="80" y="25" width="25" height="15" rx="3" fill="#93c5fd"/>
+                        <rect x="20" y="25" width="20" height="15" rx="3" fill="#93c5fd"/>
+                        <rect x="45" y="25" width="20" height="15" rx="3" fill="#93c5fd"/>
+                        <circle cx="30" cy="65" r="12" fill="#334155"/>
+                        <circle cx="30" cy="65" r="5" fill="#cbd5e1"/>
+                        <circle cx="90" cy="65" r="12" fill="#334155"/>
+                        <circle cx="90" cy="65" r="5" fill="#cbd5e1"/>
+                    </svg>
+                </div>
+            </div>
+
+            <p class="text-xl sm:text-2xl text-gray-700 mb-8 font-bold">Mari belajar nama dan tempat parkir kendaraan!</p>
+            <button onclick="startGame()" class="btn-3d btn-green text-2xl sm:text-3xl px-10 py-5 rounded-full w-full sm:w-auto font-title border-4 border-green-300">
+                MULAI MAIN 🚀
+            </button>
+        </div>
+
+        <!-- Screen: Game Area -->
+        <div id="screen-game" class="hidden flex-col h-full">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="bg-blue-100 px-4 py-2 rounded-2xl border-2 border-blue-300">
+                    <span id="level-indicator" class="text-xl sm:text-2xl font-bold text-blue-700 font-title">Level 1</span>
+                </div>
+                <div class="flex gap-1" id="stars-container">
+                    <!-- Stars will be injected here -->
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="text-center flex-grow flex flex-col justify-center items-center">
+                <h2 id="question-text" class="text-3xl sm:text-4xl text-gray-800 mb-6 font-title drop-shadow-sm">Apa nama kendaraan ini?</h2>
+                
+                <!-- Main Vehicle Display -->
+                <div id="vehicle-display" class="mb-8 w-48 h-48 sm:w-64 sm:h-64 flex justify-center items-center animate-float">
+                    <!-- SVG Injected via JS -->
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                    <!-- Buttons Injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Modal (Overlay) -->
+        <div id="feedback-modal" class="hidden absolute inset-0 bg-black/60 flex items-center justify-center z-50 rounded-3xl">
+            <div id="feedback-content" class="bg-white p-8 rounded-3xl text-center transform scale-0 transition-transform duration-300 flex flex-col items-center border-8">
+                <div id="feedback-icon" class="text-6xl mb-4"></div>
+                <h3 id="feedback-title" class="text-4xl font-title mb-4"></h3>
+                <button onclick="nextQuestion()" id="btn-next" class="btn-3d btn-blue text-2xl px-8 py-4 rounded-full mt-4 font-title">Lanjut!</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Web Audio API for Sound Effects ---
+        let audioCtx;
+        
+        function initAudio() {
+            // Memastikan Audio bisa diputar di semua browser dengan meminta izin saat klik pertama
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if(audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+        
+        function playCorrectSound() {
+            initAudio();
+            
+            // Efek suara ajaib/ceria (Chime)
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // Nada C5, E5, G5, C6
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine'; // Suara lebih lembut seperti lonceng
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i * 0.1));
+                
+                gain.gain.setValueAtTime(0, audioCtx.currentTime + (i * 0.1));
+                gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + (i * 0.1) + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (i * 0.1) + 0.6);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(audioCtx.currentTime + (i * 0.1));
+                osc.stop(audioCtx.currentTime + (i * 0.1) + 0.7);
+            });
+        }
+
+        function playWrongSound() {
+            initAudio();
+            
+            // Efek suara "womp womp" (Nada turun)
+            const time = audioCtx.currentTime;
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sawtooth'; // Suara lebih bertekstur (buzzer lucu)
+            osc.frequency.setValueAtTime(250, time);
+            osc.frequency.exponentialRampToValueAtTime(100, time + 0.5); // Nada turun
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.3, time + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, time + 0.6);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(time);
+            osc.stop(time + 0.6);
+        }
+
+        // --- Data Permainan (Assets & Content) ---
+        
+        // SVGs as strings for vehicles
+        const svgPesawat = `
+            <svg width="100%" height="100%" viewBox="0 0 100 100" class="svg-3d">
+                <defs>
+                    <linearGradient id="planeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path d="M90 50 L60 35 L40 10 L30 10 L45 45 L15 50 L5 40 L0 45 L10 55 L0 65 L5 70 L15 60 L45 65 L30 100 L40 100 L60 75 L90 60 C95 58 98 52 90 50 Z" fill="url(#planeGrad)"/>
+                <path d="M60 35 L40 10 L30 10 L45 45 Z" fill="#93c5fd" opacity="0.8"/>
+                <circle cx="65" cy="55" r="4" fill="white"/>
+                <circle cx="55" cy="52" r="4" fill="white"/>
+                <circle cx="45" cy="49" r="4" fill="white"/>
+            </svg>`;
+
+        const svgBis = `
+            <svg width="100%" height="100%" viewBox="0 0 120 90" class="svg-3d">
+                <defs>
+                    <linearGradient id="busGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#facc15;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ca8a04;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect x="5" y="20" width="110" height="50" rx="10" fill="url(#busGrad)"/>
+                <rect x="80" y="25" width="30" height="20" rx="5" fill="#bae6fd"/>
+                <rect x="45" y="25" width="30" height="20" rx="5" fill="#bae6fd"/>
+                <rect x="10" y="25" width="30" height="20" rx="5" fill="#bae6fd"/>
+                <circle cx="30" cy="70" r="15" fill="#1e293b"/>
+                <circle cx="30" cy="70" r="6" fill="#cbd5e1"/>
+                <circle cx="90" cy="70" r="15" fill="#1e293b"/>
+                <circle cx="90" cy="70" r="6" fill="#cbd5e1"/>
+                <rect x="100" y="55" width="15" height="5" fill="#ef4444"/>
+            </svg>`;
+
+        const svgKereta = `
+            <svg width="100%" height="100%" viewBox="0 0 120 90" class="svg-3d">
+                <defs>
+                    <linearGradient id="trainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#991b1b;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- Smoke -->
+                <circle cx="20" cy="20" r="8" fill="#cbd5e1" opacity="0.8"/>
+                <circle cx="35" cy="10" r="12" fill="#cbd5e1" opacity="0.6"/>
+                <!-- Body -->
+                <rect x="40" y="30" width="70" height="40" rx="5" fill="url(#trainGrad)"/>
+                <path d="M10 40 L40 40 L40 70 L10 70 C5 70 5 40 10 40 Z" fill="#3b82f6"/>
+                <rect x="20" y="25" width="10" height="15" fill="#1e293b"/>
+                <!-- Window -->
+                <rect x="70" y="35" width="20" height="15" rx="3" fill="#bae6fd"/>
+                <!-- Wheels -->
+                <circle cx="30" cy="75" r="12" fill="#1e293b"/>
+                <circle cx="30" cy="75" r="4" fill="#94a3b8"/>
+                <circle cx="65" cy="75" r="12" fill="#1e293b"/>
+                <circle cx="65" cy="75" r="4" fill="#94a3b8"/>
+                <circle cx="95" cy="75" r="12" fill="#1e293b"/>
+                <circle cx="95" cy="75" r="4" fill="#94a3b8"/>
+                <!-- Link -->
+                <rect x="15" y="70" width="90" height="4" fill="#64748b"/>
+            </svg>`;
+
+        const svgKapal = `
+            <svg width="100%" height="100%" viewBox="0 0 120 90" class="svg-3d">
+                <defs>
+                    <linearGradient id="shipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- Water -->
+                <path d="M0 75 Q 15 65 30 75 T 60 75 T 90 75 T 120 75 L 120 90 L 0 90 Z" fill="#3b82f6" opacity="0.6"/>
+                <!-- Cabin -->
+                <rect x="35" y="30" width="50" height="25" fill="#f8fafc"/>
+                <rect x="45" y="35" width="10" height="10" fill="#bae6fd"/>
+                <rect x="65" y="35" width="10" height="10" fill="#bae6fd"/>
+                <rect x="55" y="15" width="10" height="15" fill="#1e293b"/>
+                <!-- Hull -->
+                <path d="M10 55 L110 55 L95 80 L25 80 Z" fill="url(#shipGrad)"/>
+            </svg>`;
+
+        // SVGs for Places (Level 2)
+        const svgBandara = `
+            <div class="flex flex-col items-center">
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <rect x="40" y="20" width="20" height="80" fill="#64748b"/>
+                    <path d="M30 20 L70 20 L50 0 Z" fill="#ef4444"/>
+                    <path d="M0 80 L100 80 L100 100 L0 100 Z" fill="#334155"/>
+                    <path d="M20 90 L80 90" stroke="white" stroke-width="4" stroke-dasharray="10,10"/>
+                </svg>
+                <span class="text-xl font-bold mt-2">Bandara</span>
+            </div>`;
+
+        const svgTerminal = `
+            <div class="flex flex-col items-center">
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <path d="M10 40 L90 40 L80 20 L20 20 Z" fill="#0284c7"/>
+                    <rect x="10" y="40" width="80" height="50" fill="#e2e8f0"/>
+                    <rect x="25" y="50" width="50" height="40" fill="#1e293b"/>
+                    <rect x="40" y="25" width="20" height="10" fill="white"/>
+                </svg>
+                <span class="text-xl font-bold mt-2">Terminal</span>
+            </div>`;
+
+        const svgStasiun = `
+            <div class="flex flex-col items-center">
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <rect x="20" y="30" width="60" height="50" fill="#f59e0b"/>
+                    <path d="M10 30 L90 30 L50 10 Z" fill="#b45309"/>
+                    <rect x="40" y="50" width="20" height="30" fill="#78350f"/>
+                    <path d="M0 90 L100 90 M0 95 L100 95" stroke="#334155" stroke-width="4"/>
+                    <path d="M20 85 L20 100 M50 85 L50 100 M80 85 L80 100" stroke="#334155" stroke-width="4"/>
+                </svg>
+                <span class="text-xl font-bold mt-2">Stasiun</span>
+            </div>`;
+
+        const svgPelabuhan = `
+            <div class="flex flex-col items-center">
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <path d="M0 60 Q 25 50 50 60 T 100 60 L 100 100 L 0 100 Z" fill="#0ea5e9"/>
+                    <rect x="0" y="50" width="30" height="50" fill="#475569"/>
+                    <!-- Anchor -->
+                    <circle cx="70" cy="30" r="5" fill="none" stroke="#1e293b" stroke-width="3"/>
+                    <path d="M70 35 L70 80 M55 70 Q 70 90 85 70 M60 45 L80 45" stroke="#1e293b" stroke-width="3" fill="none"/>
+                </svg>
+                <span class="text-xl font-bold mt-2">Pelabuhan</span>
+            </div>`;
+
+        const dataKendaraan = [
+            { id: 'pesawat', nama: 'Pesawat', svg: svgPesawat, tempatId: 'bandara', tempatNama: 'Bandara', tempatSvg: svgBandara },
+            { id: 'bis', nama: 'Bis', svg: svgBis, tempatId: 'terminal', tempatNama: 'Terminal', tempatSvg: svgTerminal },
+            { id: 'kereta', nama: 'Kereta Api', svg: svgKereta, tempatId: 'stasiun', tempatNama: 'Stasiun', tempatSvg: svgStasiun },
+            { id: 'kapal', nama: 'Kapal Laut', svg: svgKapal, tempatId: 'pelabuhan', tempatNama: 'Pelabuhan', tempatSvg: svgPelabuhan }
+        ];
+
+        // --- Game State ---
+        let level = 1; // 1: Nama, 2: Tempat
+        let currentQuestion = 0;
+        let score = 0;
+        let totalQuestions = dataKendaraan.length;
+        let currentTarget = null;
+        let playOrder = [];
+
+        // --- Game Logic ---
+
+        function shuffle(array) {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('screen-game').classList.add('flex');
+            
+            // Inisialisasi Audio Context pada klik pertama user (kebijakan browser)
+            initAudio();
+            
+            level = 1;
+            setupLevel();
+        }
+
+        function setupLevel() {
+            currentQuestion = 0;
+            playOrder = shuffle([...dataKendaraan]);
+            updateLevelUI();
+            loadQuestion();
+        }
+
+        function updateLevelUI() {
+            document.getElementById('level-indicator').innerText = level === 1 ? "Level 1: Nama" : "Level 2: Tempat";
+            const starsContainer = document.getElementById('stars-container');
+            starsContainer.innerHTML = '';
+            for(let i=0; i<totalQuestions; i++) {
+                const star = document.createElement('span');
+                star.innerText = '⭐';
+                star.className = `text-2xl transition-all duration-300 ${i < currentQuestion ? 'opacity-100 scale-110' : 'opacity-30 grayscale'}`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= totalQuestions) {
+                // Selesai level
+                if (level === 1) {
+                    level = 2;
+                    showFeedbackModal("Hore! Level 1 Selesai!", "🎉", () => setupLevel());
+                    return;
+                } else {
+                    showFeedbackModal("Luar Biasa! Kamu Pintar!", "🏆", () => {
+                        document.getElementById('screen-game').classList.add('hidden');
+                        document.getElementById('screen-game').classList.remove('flex');
+                        document.getElementById('screen-menu').classList.remove('hidden');
+                    });
+                    return;
+                }
+            }
+
+            currentTarget = playOrder[currentQuestion];
+            const vehicleDisplay = document.getElementById('vehicle-display');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+
+            // Reset animations
+            vehicleDisplay.innerHTML = currentTarget.svg;
+            vehicleDisplay.classList.remove('animate-float', 'animate-drive');
+            // Add specific animation based on vehicle
+            if(currentTarget.id === 'pesawat' || currentTarget.id === 'kapal') {
+                vehicleDisplay.classList.add('animate-float');
+            } else {
+                vehicleDisplay.classList.add('animate-drive');
+            }
+
+            optionsContainer.innerHTML = '';
+
+            let options = [];
+            
+            if (level === 1) {
+                questionText.innerText = "Apa nama kendaraan ini?";
+                // Generate 3 options (1 correct, 2 wrong)
+                options.push({ text: currentTarget.nama, isCorrect: true });
+                let wrongOptions = dataKendaraan.filter(k => k.id !== currentTarget.id);
+                wrongOptions = shuffle(wrongOptions).slice(0, 2);
+                wrongOptions.forEach(w => options.push({ text: w.nama, isCorrect: false }));
+                
+                options = shuffle(options);
+
+                options.forEach((opt, index) => {
+                    const btnClass = ['btn-blue', 'btn-orange', 'btn-green'][index % 3];
+                    const btn = document.createElement('button');
+                    btn.className = `btn-3d ${btnClass} text-2xl sm:text-3xl font-title py-6 rounded-2xl w-full flex items-center justify-center border-4 border-white/30`;
+                    btn.innerText = opt.text;
+                    btn.onclick = () => checkAnswer(opt.isCorrect, btn);
+                    optionsContainer.appendChild(btn);
+                });
+            } else {
+                questionText.innerText = "Dimana tempat berhentinya?";
+                
+                options.push({ html: currentTarget.tempatSvg, isCorrect: true });
+                let wrongOptions = dataKendaraan.filter(k => k.id !== currentTarget.id);
+                wrongOptions = shuffle(wrongOptions).slice(0, 2);
+                wrongOptions.forEach(w => options.push({ html: w.tempatSvg, isCorrect: false }));
+                
+                options = shuffle(options);
+
+                options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = `btn-3d bg-white text-gray-800 border-4 border-blue-300 py-4 rounded-2xl w-full flex items-center justify-center hover:bg-blue-50`;
+                    btn.innerHTML = opt.html;
+                    btn.onclick = () => checkAnswer(opt.isCorrect, btn);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function checkAnswer(isCorrect, btnElement) {
+            if (isCorrect) {
+                playCorrectSound();
+                fireConfetti();
+                showFeedbackModal("Benar Sekali!", "😃", () => {
+                    currentQuestion++;
+                    updateLevelUI();
+                    loadQuestion();
+                }, true);
+            } else {
+                playWrongSound();
+                btnElement.classList.add('animate-shake');
+                setTimeout(() => btnElement.classList.remove('animate-shake'), 500);
+                showFeedbackModal("Ups! Coba Lagi!", "🤔", null, false);
+            }
+        }
+
+        let nextActionCallback = null;
+
+        function showFeedbackModal(title, icon, callback, isSuccess = true) {
+            const modal = document.getElementById('feedback-modal');
+            const content = document.getElementById('feedback-content');
+            
+            document.getElementById('feedback-title').innerText = title;
+            document.getElementById('feedback-icon').innerText = icon;
+            
+            if (isSuccess) {
+                content.classList.remove('border-red-400');
+                content.classList.add('border-green-400');
+                document.getElementById('feedback-title').classList.remove('text-red-500');
+                document.getElementById('feedback-title').classList.add('text-green-500');
+                document.getElementById('btn-next').innerText = "Lanjut! ✨";
+            } else {
+                content.classList.remove('border-green-400');
+                content.classList.add('border-red-400');
+                document.getElementById('feedback-title').classList.remove('text-green-500');
+                document.getElementById('feedback-title').classList.add('text-red-500');
+                document.getElementById('btn-next').innerText = "Tutup";
+            }
+
+            nextActionCallback = callback;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-0');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function nextQuestion() {
+            const modal = document.getElementById('feedback-modal');
+            const content = document.getElementById('feedback-content');
+            
+            content.classList.remove('scale-100');
+            content.classList.add('scale-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                if (nextActionCallback) nextActionCallback();
+            }, 300);
+        }
+
+        // --- Simple Confetti System ---
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let particles = [];
+
+        function fireConfetti() {
+            particles = [];
+            const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7'];
+            for(let i=0; i<100; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    r: Math.random() * 6 + 2,
+                    dx: Math.random() * 10 - 5,
+                    dy: Math.random() * -10 - 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 1
+                });
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, index) => {
+                p.x += p.dx;
+                p.y += p.dy;
+                p.dy += 0.2; // gravity
+                p.life -= 0.01;
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life > 0 ? p.life : 0;
+                ctx.fill();
+                
+                if(p.life <= 0) particles.splice(index, 1);
+            });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animateConfetti);
+        }
+        animateConfetti();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+    </script>
+</body>
+</html>
